@@ -9,3 +9,8 @@ output "resource_group_name" {
 output "kubeconfig_command" {
   value = module.aks_cluster.kubeconfig_command
 }
+
+output "kube_admin_config_raw" {
+  value     = module.aks_cluster.kube_admin_config_raw
+  sensitive = true
+}

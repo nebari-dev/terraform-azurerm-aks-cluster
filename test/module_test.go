@@ -5,15 +5,15 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
+	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
 
 const fixtureDir = "../examples/complete"
 
-// TestAKSClusterComplete provisions the examples/complete fixture,
-// verifies the cluster is reachable, and exercises the managed-disk CSI driver.
 func TestAKSClusterComplete(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
@@ -30,11 +30,9 @@ func TestAKSClusterComplete(t *testing.T) {
 		EnvVars: map[string]string{
 			"ARM_SUBSCRIPTION_ID": os.Getenv("ARM_SUBSCRIPTION_ID"),
 		},
-		// Write an override file that forces test-friendly settings.
 		Reconfigure: true,
 	}
 
-	// Override file to keep the cluster small for tests.
 	overridePath := filepath.Join(fixtureDir, "test_override.tf.json")
 	if err := writeTestOverride(overridePath); err != nil {
 		t.Fatalf("failed to write test override: %v", err)
@@ -50,7 +48,43 @@ func TestAKSClusterComplete(t *testing.T) {
 	}
 	t.Logf("cluster_name=%s", clusterName)
 
-	// TODO: test managed-disk CSI in Task 21.
+	kubeconfigPath := writeKubeconfig(t, terraformOptions)
+	defer os.Remove(kubeconfigPath)
+
+	testManagedDiskCSI(t, kubeconfigPath)
+}
+
+func writeKubeconfig(t *testing.T, opts *terraform.Options) string {
+	// examples/complete's outputs.tf needs to re-export kube_admin_config_raw —
+	// add that output there if Terratest can't find it.
+	kubeconfig := terraform.Output(t, opts, "kube_admin_config_raw")
+	if kubeconfig == "" {
+		t.Fatal("kube_admin_config_raw is empty")
+	}
+	f, err := os.CreateTemp("", "nebari-test-kubeconfig-*.yaml")
+	if err != nil {
+		t.Fatalf("create temp kubeconfig: %v", err)
+	}
+	if _, err := f.WriteString(kubeconfig); err != nil {
+		t.Fatalf("write kubeconfig: %v", err)
+	}
+	f.Close()
+	return f.Name()
+}
+
+func testManagedDiskCSI(t *testing.T, kubeconfigPath string) {
+	kubectl := k8s.NewKubectlOptions("", kubeconfigPath, "default")
+
+	k8s.KubectlApply(t, kubectl, "fixtures/disk-csi/storageclass.yaml")
+	defer k8s.KubectlDelete(t, kubectl, "fixtures/disk-csi/storageclass.yaml")
+
+	k8s.KubectlApply(t, kubectl, "fixtures/disk-csi/pvc.yaml")
+	defer k8s.KubectlDelete(t, kubectl, "fixtures/disk-csi/pvc.yaml")
+
+	k8s.KubectlApply(t, kubectl, "fixtures/disk-csi/pod.yaml")
+	defer k8s.KubectlDelete(t, kubectl, "fixtures/disk-csi/pod.yaml")
+
+	k8s.WaitUntilPodAvailable(t, kubectl, "test-pod", 30, 10*time.Second)
 }
 
 func getEnvOrDefault(key, defaultValue string) string {
@@ -61,7 +95,6 @@ func getEnvOrDefault(key, defaultValue string) string {
 }
 
 func writeTestOverride(path string) error {
-	// Force smallest viable VM size and a single-node system pool for cost control.
 	content := `{
   "module": {
     "aks_cluster": {
