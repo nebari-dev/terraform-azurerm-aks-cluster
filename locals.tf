@@ -24,4 +24,7 @@ locals {
 locals {
   resource_group_name     = var.create_resource_group ? azurerm_resource_group.this[0].name     : data.azurerm_resource_group.existing[0].name
   resource_group_location = var.create_resource_group ? azurerm_resource_group.this[0].location : data.azurerm_resource_group.existing[0].location
+
+  vnet_id        = var.create_vnet ? azurerm_virtual_network.this[0].id : var.existing_vnet_id
+  node_subnet_id = var.create_vnet ? azurerm_subnet.nodes[0].id         : var.existing_node_subnet_id
 }

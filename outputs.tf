@@ -57,12 +57,12 @@ output "resource_group_name" {
 
 output "vnet_id" {
   description = "Full Azure resource ID of the VNet (created or BYO)."
-  value       = null
+  value       = local.vnet_id
 }
 
 output "node_subnet_id" {
   description = "Full Azure resource ID of the node subnet."
-  value       = null
+  value       = local.node_subnet_id
 }
 
 output "kubeconfig_command" {
