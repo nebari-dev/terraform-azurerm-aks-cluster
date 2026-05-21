@@ -136,11 +136,11 @@ variable "sku_tier" {
 
 variable "identity_type" {
   type        = string
-  description = "AKS managed-identity type. Currently only \"SystemAssigned\" is supported by this module."
-  default     = "SystemAssigned"
+  description = "AKS managed-identity type. Must be \"UserAssigned\" because this module provisions a user-assigned kubelet identity, which the azurerm provider requires to be paired with a UserAssigned cluster identity."
+  default     = "UserAssigned"
   validation {
-    condition     = var.identity_type == "SystemAssigned"
-    error_message = "Only SystemAssigned is supported in this version."
+    condition     = var.identity_type == "UserAssigned"
+    error_message = "Only UserAssigned is supported in this version."
   }
 }
 
