@@ -55,11 +55,9 @@ func TestAKSClusterComplete(t *testing.T) {
 }
 
 func writeKubeconfig(t *testing.T, opts *terraform.Options) string {
-	// examples/complete's outputs.tf needs to re-export kube_admin_config_raw —
-	// add that output there if Terratest can't find it.
-	kubeconfig := terraform.Output(t, opts, "kube_admin_config_raw")
+	kubeconfig := terraform.Output(t, opts, "kube_config_raw")
 	if kubeconfig == "" {
-		t.Fatal("kube_admin_config_raw is empty")
+		t.Fatal("kube_config_raw is empty")
 	}
 	f, err := os.CreateTemp("", "nebari-test-kubeconfig-*.yaml")
 	if err != nil {

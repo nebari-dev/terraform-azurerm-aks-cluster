@@ -15,19 +15,22 @@ output "cluster_fqdn" {
 
 output "host" {
   description = "URL of the AKS API server (for kubeconfig server field)."
-  value       = azurerm_kubernetes_cluster.this.kube_admin_config[0].host
+  value       = azurerm_kubernetes_cluster.this.kube_config[0].host
   sensitive   = true
 }
 
-output "kube_admin_config_raw" {
-  description = "Ready-to-use kubeconfig for admin access."
-  value       = azurerm_kubernetes_cluster.this.kube_admin_config_raw
+# kube_admin_config* is only populated when Azure AD admin is enabled on the
+# cluster. This module doesn't enable AAD, so we expose the local-admin
+# kubeconfig (kube_config_raw) instead.
+output "kube_config_raw" {
+  description = "Ready-to-use kubeconfig for cluster-admin access via the local account."
+  value       = azurerm_kubernetes_cluster.this.kube_config_raw
   sensitive   = true
 }
 
 output "cluster_ca_certificate" {
   description = "Base64-encoded CA certificate of the AKS API server."
-  value       = azurerm_kubernetes_cluster.this.kube_admin_config[0].cluster_ca_certificate
+  value       = azurerm_kubernetes_cluster.this.kube_config[0].cluster_ca_certificate
   sensitive   = true
 }
 
