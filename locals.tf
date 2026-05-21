@@ -1,8 +1,11 @@
 locals {
   # Tags merged onto every resource so NIC's tag-based discovery works.
+  # Azure tag names disallow these reserved chars: < > % & \ ? /
+  # The Kubernetes-style "domain/key" convention doesn't survive on Azure, so
+  # we substitute "_" for "/" while keeping the nic.nebari.dev namespace.
   tags = merge(var.tags, {
-    "nic.nebari.dev/cluster-name" = var.project_name
-    "nic.nebari.dev/managed-by"   = "nic"
+    "nic.nebari.dev_cluster-name" = var.project_name
+    "nic.nebari.dev_managed-by"   = "nic"
   })
 
   # Identify the system pool. If exactly one node group has mode="System",
