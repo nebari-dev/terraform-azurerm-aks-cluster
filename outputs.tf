@@ -37,12 +37,12 @@ output "oidc_issuer_url" {
 
 output "kubelet_identity_object_id" {
   description = "Object ID of the user-assigned kubelet identity."
-  value       = null
+  value       = azurerm_user_assigned_identity.kubelet.principal_id
 }
 
 output "kubelet_identity_client_id" {
   description = "Client ID of the user-assigned kubelet identity."
-  value       = null
+  value       = azurerm_user_assigned_identity.kubelet.client_id
 }
 
 output "node_resource_group" {

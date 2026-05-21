@@ -38,3 +38,14 @@ resource "azurerm_subnet" "nodes" {
   virtual_network_name = azurerm_virtual_network.this[0].name
   address_prefixes     = [var.node_subnet_cidr_block]
 }
+
+# ───────────────────────────────────────────────────────────────────────────
+# Kubelet identity (user-assigned)
+# ───────────────────────────────────────────────────────────────────────────
+
+resource "azurerm_user_assigned_identity" "kubelet" {
+  name                = "${var.project_name}-kubelet"
+  location            = local.resource_group_location
+  resource_group_name = local.resource_group_name
+  tags                = local.tags
+}
