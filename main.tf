@@ -123,3 +123,15 @@ resource "azurerm_kubernetes_cluster_node_pool" "user" {
   zones                 = each.value.zones
   tags                  = local.tags
 }
+
+# ───────────────────────────────────────────────────────────────────────────
+# Role assignment: AKS identity → existing subnet (only when BYO networking)
+# ───────────────────────────────────────────────────────────────────────────
+
+resource "azurerm_role_assignment" "network_contributor" {
+  count = var.create_vnet ? 0 : 1
+
+  scope                = var.existing_node_subnet_id
+  role_definition_name = "Network Contributor"
+  principal_id         = azurerm_kubernetes_cluster.this.identity[0].principal_id
+}
