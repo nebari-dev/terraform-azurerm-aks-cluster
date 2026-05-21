@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  pull_request:
+    paths:
+      - "**.tf"
+      - ".github/workflows/ci.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "**.tf"
+      - ".github/workflows/ci.yml"
+
+env:
+  TF_IN_AUTOMATION: true
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.11.2
+
+      - name: OpenTofu Format Check
+        run: tofu fmt -check -recursive
+
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.11.2
+
+      - name: OpenTofu Init
+        run: tofu init -backend=false
+
+      - name: OpenTofu Validate
+        run: tofu validate
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: v0.60.0
+          cache: true
+
+      - name: Init TFLint
+        run: tflint --init
+        env:
+          # https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/plugins.md#avoiding-rate-limiting
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Run TFLint
+        run: tflint -f compact
+
+  docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Check docs
+        uses: terraform-docs/gh-actions@v1
+        with:
+          config-file: .terraform-docs.yml
+          fail-on-diff: true
