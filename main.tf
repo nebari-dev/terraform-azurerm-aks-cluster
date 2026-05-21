@@ -101,3 +101,25 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   tags = local.tags
 }
+
+# ───────────────────────────────────────────────────────────────────────────
+# Additional user node pools
+# ───────────────────────────────────────────────────────────────────────────
+
+resource "azurerm_kubernetes_cluster_node_pool" "user" {
+  for_each = local.user_pools
+
+  name                  = each.key
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.this.id
+  vm_size               = each.value.vm_size
+  min_count             = each.value.min_count
+  max_count             = each.value.max_count
+  auto_scaling_enabled  = true
+  mode                  = each.value.mode
+  os_disk_size_gb       = each.value.os_disk_size_gb
+  vnet_subnet_id        = local.node_subnet_id
+  node_labels           = each.value.labels
+  node_taints           = each.value.taints
+  zones                 = each.value.zones
+  tags                  = local.tags
+}
