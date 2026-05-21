@@ -49,3 +49,55 @@ resource "azurerm_user_assigned_identity" "kubelet" {
   resource_group_name = local.resource_group_name
   tags                = local.tags
 }
+
+# ───────────────────────────────────────────────────────────────────────────
+# AKS cluster (system node pool inline)
+# ───────────────────────────────────────────────────────────────────────────
+
+resource "azurerm_kubernetes_cluster" "this" {
+  name                = "${var.project_name}-aks"
+  location            = local.resource_group_location
+  resource_group_name = local.resource_group_name
+  dns_prefix          = var.project_name
+  kubernetes_version  = var.kubernetes_version
+  sku_tier            = var.sku_tier
+
+  private_cluster_enabled = var.private_cluster_enabled
+
+  api_server_access_profile {
+    authorized_ip_ranges = var.private_cluster_enabled || length(var.authorized_ip_ranges) == 0 ? null : var.authorized_ip_ranges
+  }
+
+  default_node_pool {
+    name                 = local.system_pool_name
+    vm_size              = local.system_pool.vm_size
+    min_count            = local.system_pool.min_count
+    max_count            = local.system_pool.max_count
+    auto_scaling_enabled = true
+    os_disk_size_gb      = local.system_pool.os_disk_size_gb
+    vnet_subnet_id       = local.node_subnet_id
+    node_labels          = local.system_pool.labels
+    zones                = local.system_pool.zones
+    tags                 = local.tags
+  }
+
+  identity {
+    type = var.identity_type
+  }
+
+  kubelet_identity {
+    user_assigned_identity_id = azurerm_user_assigned_identity.kubelet.id
+    object_id                 = azurerm_user_assigned_identity.kubelet.principal_id
+    client_id                 = azurerm_user_assigned_identity.kubelet.client_id
+  }
+
+  network_profile {
+    network_plugin      = var.network_plugin
+    network_plugin_mode = var.network_plugin_mode
+    pod_cidr            = var.network_plugin_mode == "overlay" ? var.pod_cidr : null
+    service_cidr        = var.service_cidr
+    dns_service_ip      = var.dns_service_ip
+  }
+
+  tags = local.tags
+}

@@ -1,38 +1,39 @@
 output "cluster_id" {
   description = "Full Azure resource ID of the AKS cluster."
-  value       = null
+  value       = azurerm_kubernetes_cluster.this.id
 }
 
 output "cluster_name" {
   description = "Name of the AKS cluster."
-  value       = null
+  value       = azurerm_kubernetes_cluster.this.name
 }
 
 output "cluster_fqdn" {
   description = "Fully-qualified domain name of the AKS API server."
-  value       = null
+  value       = azurerm_kubernetes_cluster.this.fqdn
 }
 
 output "host" {
   description = "URL of the AKS API server (for kubeconfig server field)."
-  value       = null
+  value       = azurerm_kubernetes_cluster.this.kube_admin_config[0].host
+  sensitive   = true
 }
 
 output "kube_admin_config_raw" {
   description = "Ready-to-use kubeconfig for admin access."
-  value       = null
+  value       = azurerm_kubernetes_cluster.this.kube_admin_config_raw
   sensitive   = true
 }
 
 output "cluster_ca_certificate" {
   description = "Base64-encoded CA certificate of the AKS API server."
-  value       = null
+  value       = azurerm_kubernetes_cluster.this.kube_admin_config[0].cluster_ca_certificate
   sensitive   = true
 }
 
 output "oidc_issuer_url" {
-  description = "OIDC issuer URL of the AKS cluster (for future Workload Identity work)."
-  value       = null
+  description = "OIDC issuer URL of the AKS cluster."
+  value       = azurerm_kubernetes_cluster.this.oidc_issuer_url
 }
 
 output "kubelet_identity_object_id" {
@@ -47,7 +48,7 @@ output "kubelet_identity_client_id" {
 
 output "node_resource_group" {
   description = "Name of the AKS-managed node resource group (MC_*)."
-  value       = null
+  value       = azurerm_kubernetes_cluster.this.node_resource_group
 }
 
 output "resource_group_name" {
@@ -67,5 +68,5 @@ output "node_subnet_id" {
 
 output "kubeconfig_command" {
   description = "Convenience command to fetch a kubeconfig via the Azure CLI."
-  value       = null
+  value       = "az aks get-credentials --resource-group ${local.resource_group_name} --name ${azurerm_kubernetes_cluster.this.name} --admin"
 }
