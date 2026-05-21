@@ -100,7 +100,7 @@ func writeTestOverride(path string) error {
     "aks_cluster": {
       "node_groups": {
         "system": {
-          "vm_size":   "Standard_B2s",
+          "vm_size":   "Standard_D2_v3",
           "min_count": 1,
           "max_count": 1,
           "mode":      "System"
