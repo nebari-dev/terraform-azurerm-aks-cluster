@@ -40,20 +40,32 @@ resource "azurerm_subnet" "nodes" {
 }
 
 # ───────────────────────────────────────────────────────────────────────────
-# Kubelet identity (user-assigned).
+# Control-plane and kubelet identities (both user-assigned).
 #
 # A custom kubelet_identity on the cluster requires the cluster identity to
-# also be UserAssigned (azurerm provider RequiredWith). We reuse this same
-# identity for the control plane so AKS handles the Managed Identity Operator
-# assignment implicitly — avoiding a role assignment the deployer often lacks
-# permission to create.
+# also be UserAssigned (azurerm provider RequiredWith). The control-plane
+# identity needs "Managed Identity Operator" on the kubelet identity so AKS
+# can attach it to the VMSS nodes.
 # ───────────────────────────────────────────────────────────────────────────
+
+resource "azurerm_user_assigned_identity" "cluster" {
+  name                = "${var.project_name}-cluster"
+  location            = local.resource_group_location
+  resource_group_name = local.resource_group_name
+  tags                = local.tags
+}
 
 resource "azurerm_user_assigned_identity" "kubelet" {
   name                = "${var.project_name}-kubelet"
   location            = local.resource_group_location
   resource_group_name = local.resource_group_name
   tags                = local.tags
+}
+
+resource "azurerm_role_assignment" "cluster_kubelet_operator" {
+  scope                = azurerm_user_assigned_identity.kubelet.id
+  role_definition_name = "Managed Identity Operator"
+  principal_id         = azurerm_user_assigned_identity.cluster.principal_id
 }
 
 # ───────────────────────────────────────────────────────────────────────────
@@ -89,7 +101,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   identity {
     type         = var.identity_type
-    identity_ids = [azurerm_user_assigned_identity.kubelet.id]
+    identity_ids = [azurerm_user_assigned_identity.cluster.id]
   }
 
   kubelet_identity {
@@ -107,6 +119,8 @@ resource "azurerm_kubernetes_cluster" "this" {
   }
 
   tags = local.tags
+
+  depends_on = [azurerm_role_assignment.cluster_kubelet_operator]
 }
 
 # ───────────────────────────────────────────────────────────────────────────
