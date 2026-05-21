@@ -12,7 +12,7 @@ locals {
     for name, ng in var.node_groups : name if ng.mode == "System"
   ]
   system_pool_name = length(local.explicit_system_pools) > 0 ? local.explicit_system_pools[0] : keys(var.node_groups)[0]
-  system_pool      = var.node_groups[local.system_pool_name]
+  system_pool = merge(var.node_groups[local.system_pool_name], { mode = "System" })
 
   # User pools = everything except the system pool.
   user_pools = {
