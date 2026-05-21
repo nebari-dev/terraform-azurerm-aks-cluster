@@ -52,7 +52,7 @@ output "node_resource_group" {
 
 output "resource_group_name" {
   description = "Name of the resource group containing the cluster (created or BYO)."
-  value       = null
+  value       = local.resource_group_name
 }
 
 output "vnet_id" {

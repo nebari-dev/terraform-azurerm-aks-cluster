@@ -20,3 +20,8 @@ locals {
     if name != local.system_pool_name
   }
 }
+
+locals {
+  resource_group_name     = var.create_resource_group ? azurerm_resource_group.this[0].name     : data.azurerm_resource_group.existing[0].name
+  resource_group_location = var.create_resource_group ? azurerm_resource_group.this[0].location : data.azurerm_resource_group.existing[0].location
+}
