@@ -8,6 +8,16 @@ Mirrors the conventions of [terraform-aws-eks-cluster](https://github.com/nebari
 
 See [`examples/complete`](./examples/complete) for a reference deployment.
 
+## CI/Testing
+
+Terratest runs against a real Azure subscription. The repo needs these GitHub secrets configured:
+
+- `AZURE_CLIENT_ID` — App registration client ID with federated OIDC credentials trusting this repo.
+- `AZURE_TENANT_ID` — Azure AD tenant ID.
+- `AZURE_SUBSCRIPTION_ID` — Subscription where test resources are created.
+
+The app registration must have `Contributor` on the subscription (or on a scoped test resource group prefix).
+
 <!-- BEGIN_TF_DOCS -->
 
 
