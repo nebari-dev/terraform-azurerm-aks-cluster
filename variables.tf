@@ -90,6 +90,20 @@ variable "pod_cidr" {
   default     = "10.244.0.0/16"
 }
 
+variable "network_data_plane" {
+  type        = string
+  description = "AKS network dataplane. \"azure\" (default) or \"cilium\" (Azure CNI Powered by Cilium). \"cilium\" requires network_plugin=\"azure\" and network_plugin_mode=\"overlay\"."
+  default     = "azure"
+  validation {
+    condition     = contains(["azure", "cilium"], var.network_data_plane)
+    error_message = "network_data_plane must be one of: azure, cilium."
+  }
+  validation {
+    condition     = var.network_data_plane != "cilium" || (var.network_plugin == "azure" && var.network_plugin_mode == "overlay")
+    error_message = "network_data_plane=\"cilium\" requires network_plugin=\"azure\" and network_plugin_mode=\"overlay\"."
+  }
+}
+
 variable "service_cidr" {
   type        = string
   description = "Kubernetes service CIDR. Must not overlap with VNet or pod_cidr."
@@ -141,6 +155,20 @@ variable "identity_type" {
   validation {
     condition     = var.identity_type == "UserAssigned"
     error_message = "Only UserAssigned is supported in this version."
+  }
+}
+
+variable "node_provisioning_mode" {
+  type        = string
+  description = "AKS node provisioning mode. \"Manual\" (default) or \"Auto\" to enable Node Auto Provisioning (Karpenter). \"Auto\" requires network_data_plane=\"cilium\". Applied via the azapi provider because the stable azurerm provider does not yet expose this argument (see hashicorp/terraform-provider-azurerm#31418)."
+  default     = "Manual"
+  validation {
+    condition     = contains(["Manual", "Auto"], var.node_provisioning_mode)
+    error_message = "node_provisioning_mode must be one of: Manual, Auto."
+  }
+  validation {
+    condition     = var.node_provisioning_mode != "Auto" || var.network_data_plane == "cilium"
+    error_message = "node_provisioning_mode=\"Auto\" requires network_data_plane=\"cilium\"."
   }
 }
 

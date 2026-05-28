@@ -28,14 +28,16 @@ See `examples/complete` for a working example.
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9 |
+| <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) | >= 2.0 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 4.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
+| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | >= 2.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 4.0 |
 
 ## Modules
@@ -45,7 +47,8 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
+| [azapi_update_resource.node_auto_provisioning](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/update_resource) | resource |
 | [azurerm_kubernetes_cluster.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster) | resource |
 | [azurerm_kubernetes_cluster_node_pool.user](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool) | resource |
 | [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) | resource |
@@ -60,7 +63,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_authorized_ip_ranges"></a> [authorized\_ip\_ranges](#input\_authorized\_ip\_ranges) | List of CIDRs allowed to reach the API server. Ignored when private\_cluster\_enabled=true. | `list(string)` | `[]` | no |
 | <a name="input_create_resource_group"></a> [create\_resource\_group](#input\_create\_resource\_group) | If true, the module creates the resource group. If false, existing\_resource\_group\_name must be set. | `bool` | `true` | no |
 | <a name="input_create_vnet"></a> [create\_vnet](#input\_create\_vnet) | If true, the module creates a VNet and node subnet. If false, existing\_vnet\_id and existing\_node\_subnet\_id must be set. | `bool` | `true` | no |
@@ -71,9 +74,11 @@ No modules.
 | <a name="input_identity_type"></a> [identity\_type](#input\_identity\_type) | AKS managed-identity type. Must be "UserAssigned" because this module provisions a user-assigned kubelet identity, which the azurerm provider requires to be paired with a UserAssigned cluster identity. | `string` | `"UserAssigned"` | no |
 | <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | Kubernetes version (e.g. "1.34"). If null, AKS picks the current default. | `string` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | Azure region (e.g. "eastus"). | `string` | n/a | yes |
+| <a name="input_network_data_plane"></a> [network\_data\_plane](#input\_network\_data\_plane) | AKS network dataplane. "azure" (default) or "cilium" (Azure CNI Powered by Cilium). "cilium" requires network\_plugin="azure" and network\_plugin\_mode="overlay". | `string` | `"azure"` | no |
 | <a name="input_network_plugin"></a> [network\_plugin](#input\_network\_plugin) | AKS network plugin. "azure" (recommended) or "kubenet". | `string` | `"azure"` | no |
 | <a name="input_network_plugin_mode"></a> [network\_plugin\_mode](#input\_network\_plugin\_mode) | AKS network plugin mode. "overlay" (recommended for new clusters) or null for legacy Azure CNI. | `string` | `"overlay"` | no |
 | <a name="input_node_groups"></a> [node\_groups](#input\_node\_groups) | Map of node-pool name to config. Exactly one pool must have mode="System"; if none specified, the first entry is defaulted to System. | <pre>map(object({<br/>    vm_size         = string<br/>    min_count       = number<br/>    max_count       = number<br/>    mode            = optional(string, "User")<br/>    os_disk_size_gb = optional(number, 128)<br/>    labels          = optional(map(string), {})<br/>    taints          = optional(list(string), [])<br/>    zones           = optional(list(string), [])<br/>  }))</pre> | n/a | yes |
+| <a name="input_node_provisioning_mode"></a> [node\_provisioning\_mode](#input\_node\_provisioning\_mode) | AKS node provisioning mode. "Manual" (default) or "Auto" to enable Node Auto Provisioning (Karpenter). "Auto" requires network\_data\_plane="cilium". Applied via the azapi provider because the stable azurerm provider does not yet expose this argument (see hashicorp/terraform-provider-azurerm#31418). | `string` | `"Manual"` | no |
 | <a name="input_node_subnet_cidr_block"></a> [node\_subnet\_cidr\_block](#input\_node\_subnet\_cidr\_block) | Node subnet CIDR when create\_vnet=true. | `string` | `"10.0.0.0/22"` | no |
 | <a name="input_pod_cidr"></a> [pod\_cidr](#input\_pod\_cidr) | Pod CIDR when network\_plugin\_mode="overlay". | `string` | `"10.244.0.0/16"` | no |
 | <a name="input_private_cluster_enabled"></a> [private\_cluster\_enabled](#input\_private\_cluster\_enabled) | If true, the API server is reachable only via a private endpoint. | `bool` | `false` | no |
@@ -86,7 +91,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_cluster_ca_certificate"></a> [cluster\_ca\_certificate](#output\_cluster\_ca\_certificate) | Base64-encoded CA certificate of the AKS API server. |
 | <a name="output_cluster_fqdn"></a> [cluster\_fqdn](#output\_cluster\_fqdn) | Fully-qualified domain name of the AKS API server. |
 | <a name="output_cluster_id"></a> [cluster\_id](#output\_cluster\_id) | Full Azure resource ID of the AKS cluster. |
