@@ -168,7 +168,9 @@ resource "azurerm_kubernetes_cluster_node_pool" "user" {
 resource "azurerm_role_assignment" "network_contributor" {
   scope                = local.node_subnet_id
   role_definition_name = "Network Contributor"
-  principal_id         = azurerm_kubernetes_cluster.this.identity[0].principal_id
+  # identity_type is pinned to "UserAssigned", so identity[0].principal_id is
+  # null — read the principal_id off the UAMI resource directly instead.
+  principal_id = azurerm_user_assigned_identity.cluster.principal_id
 }
 
 # ───────────────────────────────────────────────────────────────────────────
