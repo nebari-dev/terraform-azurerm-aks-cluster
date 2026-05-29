@@ -86,12 +86,18 @@ resource "azurerm_kubernetes_cluster" "this" {
     authorized_ip_ranges = var.private_cluster_enabled || length(var.authorized_ip_ranges) == 0 ? null : var.authorized_ip_ranges
   }
 
+  # NAP (node_provisioning_mode="Auto") requires every pool to have
+  # autoscaling DISABLED — Azure rejects the nodeProvisioningProfile PATCH
+  # otherwise. When NAP is on, fix the pool at min_count nodes and let NAP
+  # provision additional capacity via its own NodePools. When NAP is off, run
+  # the classic cluster-autoscaler with min/max.
   default_node_pool {
     name                 = local.system_pool_name
     vm_size              = local.system_pool.vm_size
-    min_count            = local.system_pool.min_count
-    max_count            = local.system_pool.max_count
-    auto_scaling_enabled = true
+    auto_scaling_enabled = var.node_provisioning_mode != "Auto"
+    node_count           = var.node_provisioning_mode == "Auto" ? local.system_pool.min_count : null
+    min_count            = var.node_provisioning_mode == "Auto" ? null : local.system_pool.min_count
+    max_count            = var.node_provisioning_mode == "Auto" ? null : local.system_pool.max_count
     os_disk_size_gb      = local.system_pool.os_disk_size_gb
     vnet_subnet_id       = local.node_subnet_id
     node_labels          = local.system_pool.labels
@@ -134,9 +140,10 @@ resource "azurerm_kubernetes_cluster_node_pool" "user" {
   name                  = each.key
   kubernetes_cluster_id = azurerm_kubernetes_cluster.this.id
   vm_size               = each.value.vm_size
-  min_count             = each.value.min_count
-  max_count             = each.value.max_count
-  auto_scaling_enabled  = true
+  auto_scaling_enabled  = var.node_provisioning_mode != "Auto"
+  node_count            = var.node_provisioning_mode == "Auto" ? each.value.min_count : null
+  min_count             = var.node_provisioning_mode == "Auto" ? null : each.value.min_count
+  max_count             = var.node_provisioning_mode == "Auto" ? null : each.value.max_count
   mode                  = each.value.mode
   os_disk_size_gb       = each.value.os_disk_size_gb
   vnet_subnet_id        = local.node_subnet_id
@@ -147,13 +154,19 @@ resource "azurerm_kubernetes_cluster_node_pool" "user" {
 }
 
 # ───────────────────────────────────────────────────────────────────────────
-# Role assignment: AKS identity → existing subnet (only when BYO networking)
+# Role assignment: AKS identity → node subnet
+#
+# Required for both networking modes:
+#   * BYO subnet — the cluster identity has no implicit perms on a subnet
+#     it didn't create.
+#   * Module-created VNet — the VNet lives in the user's RG (not the AKS-
+#     managed MC_* node RG), so the cluster identity also has no implicit
+#     access here. Without this, NAP's Karpenter reports SubnetsReady=False
+#     with a 403 from ARM.
 # ───────────────────────────────────────────────────────────────────────────
 
 resource "azurerm_role_assignment" "network_contributor" {
-  count = var.create_vnet ? 0 : 1
-
-  scope                = var.existing_node_subnet_id
+  scope                = local.node_subnet_id
   role_definition_name = "Network Contributor"
   principal_id         = azurerm_kubernetes_cluster.this.identity[0].principal_id
 }
