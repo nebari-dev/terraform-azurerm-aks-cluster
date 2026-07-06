@@ -73,3 +73,8 @@ output "kubeconfig_command" {
   description = "Convenience command to fetch a kubeconfig via the Azure CLI."
   value       = "az aks get-credentials --resource-group ${local.resource_group_name} --name ${azurerm_kubernetes_cluster.this.name} --admin"
 }
+
+output "longhorn_backup_container" {
+  description = "Name of the Longhorn backup blob container; empty when not created."
+  value       = var.longhorn_backup_container_create ? azurerm_storage_container.longhorn_backup[0].name : ""
+}
