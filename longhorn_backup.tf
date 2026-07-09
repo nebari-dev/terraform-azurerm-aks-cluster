@@ -16,7 +16,7 @@ resource "azurerm_storage_account" "longhorn_backup" {
   location                 = local.resource_group_location
   account_tier             = "Standard"
   account_replication_type = "LRS"
-  tags                     = var.tags
+  tags                     = local.tags
 }
 
 resource "azurerm_storage_container" "longhorn_backup" {
