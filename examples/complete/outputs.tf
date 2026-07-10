@@ -14,3 +14,7 @@ output "kube_config_raw" {
   value     = module.aks_cluster.kube_config_raw
   sensitive = true
 }
+
+output "longhorn_backup_container_name" {
+  value = module.longhorn_backup.container_name
+}

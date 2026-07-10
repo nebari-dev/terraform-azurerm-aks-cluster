@@ -48,6 +48,12 @@ func TestAKSClusterComplete(t *testing.T) {
 	}
 	t.Logf("cluster_name=%s", clusterName)
 
+	backupContainer := terraform.Output(t, terraformOptions, "longhorn_backup_container_name")
+	if backupContainer == "" {
+		t.Fatal("longhorn_backup_container_name output is empty")
+	}
+	t.Logf("longhorn_backup_container_name=%s", backupContainer)
+
 	kubeconfigPath := writeKubeconfig(t, terraformOptions)
 	defer os.Remove(kubeconfigPath)
 

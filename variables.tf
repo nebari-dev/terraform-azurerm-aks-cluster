@@ -201,25 +201,3 @@ variable "node_groups" {
     error_message = "At most one node group may have mode=\"System\"."
   }
 }
-
-# ───────────────────────────────────────────────────────────────────────────
-# Longhorn backup container
-# ───────────────────────────────────────────────────────────────────────────
-
-variable "longhorn_backup_container_create" {
-  type        = bool
-  description = "Create a storage account + blob container for Longhorn off-cluster backups (azblob target)."
-  default     = false
-}
-
-variable "longhorn_backup_storage_account" {
-  type        = string
-  description = "Name of the Longhorn backup storage account. Required when longhorn_backup_container_create=true."
-  default     = ""
-}
-
-variable "longhorn_backup_container_name" {
-  type        = string
-  description = "Name of the Longhorn backup blob container. Required when longhorn_backup_container_create=true."
-  default     = ""
-}

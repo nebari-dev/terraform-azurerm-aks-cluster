@@ -38,3 +38,18 @@ module "aks_cluster" {
     Project     = "nebari"
   }
 }
+
+module "longhorn_backup" {
+  source = "../../modules/longhorn-backup"
+
+  # Storage account names: 3-24 lowercase alphanumeric characters, globally unique.
+  storage_account_name = "${substr(replace(lower(var.project_name), "/[^a-z0-9]/", ""), 0, 21)}lhb"
+  container_name       = "longhorn-backups"
+  resource_group_name  = module.aks_cluster.resource_group_name
+  location             = var.location
+
+  tags = {
+    Environment = "development"
+    Project     = "nebari"
+  }
+}
