@@ -48,6 +48,12 @@ func TestAKSClusterComplete(t *testing.T) {
 	}
 	t.Logf("cluster_name=%s", clusterName)
 
+	backupStorageAccount := terraform.Output(t, terraformOptions, "longhorn_backup_storage_account_name")
+	if backupStorageAccount == "" {
+		t.Fatal("longhorn_backup_storage_account_name output is empty")
+	}
+	t.Logf("longhorn_backup_storage_account_name=%s", backupStorageAccount)
+
 	backupContainer := terraform.Output(t, terraformOptions, "longhorn_backup_container_name")
 	if backupContainer == "" {
 		t.Fatal("longhorn_backup_container_name output is empty")

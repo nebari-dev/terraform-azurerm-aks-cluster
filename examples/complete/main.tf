@@ -33,20 +33,13 @@ module "aks_cluster" {
     }
   }
 
-  tags = {
-    Environment = "development"
-    Project     = "nebari"
-  }
-}
-
-module "longhorn_backup" {
-  source = "../../modules/longhorn-backup"
-
-  # Storage account names: 3-24 lowercase alphanumeric characters, globally unique.
-  storage_account_name = "${substr(replace(lower(var.project_name), "/[^a-z0-9]/", ""), 0, 21)}lhb"
-  container_name       = "longhorn-backups"
-  resource_group_name  = module.aks_cluster.resource_group_name
-  location             = var.location
+  # Longhorn backup configuration.
+  # Storage account names: 3-24 lowercase alphanumeric characters, globally
+  # unique. The terratest suite passes a random project_name, so strip anything
+  # that isn't lowercase alphanumeric and leave room for the "lhb" suffix.
+  longhorn_backup_container_create     = true
+  longhorn_backup_storage_account_name = "${substr(replace(lower(var.project_name), "/[^a-z0-9]/", ""), 0, 21)}lhb"
+  longhorn_backup_container_name       = "longhorn-backups"
 
   tags = {
     Environment = "development"

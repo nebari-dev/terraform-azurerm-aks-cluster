@@ -2,7 +2,7 @@
 
 Storage account + blob container for Longhorn off-cluster backups (Longhorn's native `azblob://` target).
 
-The root module does not call it; consumers (e.g. Nebari Infrastructure Core) that schedule Longhorn backups instantiate it alongside the cluster.
+The root module calls it when `longhorn_backup_container_create = true`, so consumers normally set that variable rather than instantiating this module directly. The usage below is for callers that need the storage outside a cluster deployment.
 
 Requires azurerm provider >= 4.9 (`storage_account_id` on `azurerm_storage_container`).
 

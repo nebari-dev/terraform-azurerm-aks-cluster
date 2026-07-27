@@ -15,6 +15,10 @@ output "kube_config_raw" {
   sensitive = true
 }
 
+output "longhorn_backup_storage_account_name" {
+  value = module.aks_cluster.longhorn_backup_storage_account_name
+}
+
 output "longhorn_backup_container_name" {
-  value = module.longhorn_backup.container_name
+  value = module.aks_cluster.longhorn_backup_container_name
 }

@@ -31,18 +31,20 @@ See `examples/complete` for a working example.
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9 |
 | <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) | >= 2.0 |
-| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 4.0 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 4.9 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_azapi"></a> [azapi](#provider\_azapi) | >= 2.0 |
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 4.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 4.9 |
 
 ## Modules
 
-No modules.
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_longhorn_backup"></a> [longhorn\_backup](#module\_longhorn\_backup) | ./modules/longhorn-backup | n/a |
 
 ## Resources
 
@@ -74,6 +76,9 @@ No modules.
 | <a name="input_identity_type"></a> [identity\_type](#input\_identity\_type) | AKS managed-identity type. Must be "UserAssigned" because this module provisions a user-assigned kubelet identity, which the azurerm provider requires to be paired with a UserAssigned cluster identity. | `string` | `"UserAssigned"` | no |
 | <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | Kubernetes version (e.g. "1.34"). If null, AKS picks the current default. | `string` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | Azure region (e.g. "eastus"). | `string` | n/a | yes |
+| <a name="input_longhorn_backup_container_create"></a> [longhorn\_backup\_container\_create](#input\_longhorn\_backup\_container\_create) | Create a storage account and blob container for Longhorn off-cluster backups (Longhorn's native azblob:// target). | `bool` | `false` | no |
+| <a name="input_longhorn_backup_container_name"></a> [longhorn\_backup\_container\_name](#input\_longhorn\_backup\_container\_name) | Name of the Longhorn backup blob container. | `string` | `"longhorn-backups"` | no |
+| <a name="input_longhorn_backup_storage_account_name"></a> [longhorn\_backup\_storage\_account\_name](#input\_longhorn\_backup\_storage\_account\_name) | Name of the Longhorn backup storage account. Required when longhorn\_backup\_container\_create is true. Must be globally unique and 3-24 lowercase alphanumeric characters. | `string` | `""` | no |
 | <a name="input_network_data_plane"></a> [network\_data\_plane](#input\_network\_data\_plane) | AKS network dataplane. "azure" (default) or "cilium" (Azure CNI Powered by Cilium). "cilium" requires network\_plugin="azure" and network\_plugin\_mode="overlay". | `string` | `"azure"` | no |
 | <a name="input_network_plugin"></a> [network\_plugin](#input\_network\_plugin) | AKS network plugin. "azure" (recommended) or "kubenet". | `string` | `"azure"` | no |
 | <a name="input_network_plugin_mode"></a> [network\_plugin\_mode](#input\_network\_plugin\_mode) | AKS network plugin mode. "overlay" (recommended for new clusters) or null for legacy Azure CNI. | `string` | `"overlay"` | no |
@@ -101,6 +106,8 @@ No modules.
 | <a name="output_kubeconfig_command"></a> [kubeconfig\_command](#output\_kubeconfig\_command) | Convenience command to fetch a kubeconfig via the Azure CLI. |
 | <a name="output_kubelet_identity_client_id"></a> [kubelet\_identity\_client\_id](#output\_kubelet\_identity\_client\_id) | Client ID of the user-assigned kubelet identity. |
 | <a name="output_kubelet_identity_object_id"></a> [kubelet\_identity\_object\_id](#output\_kubelet\_identity\_object\_id) | Object ID of the user-assigned kubelet identity. |
+| <a name="output_longhorn_backup_container_name"></a> [longhorn\_backup\_container\_name](#output\_longhorn\_backup\_container\_name) | Name of the Longhorn backup blob container (null when longhorn\_backup\_container\_create is false). |
+| <a name="output_longhorn_backup_storage_account_name"></a> [longhorn\_backup\_storage\_account\_name](#output\_longhorn\_backup\_storage\_account\_name) | Name of the Longhorn backup storage account (null when longhorn\_backup\_container\_create is false). |
 | <a name="output_node_resource_group"></a> [node\_resource\_group](#output\_node\_resource\_group) | Name of the AKS-managed node resource group (MC\_*). |
 | <a name="output_node_subnet_id"></a> [node\_subnet\_id](#output\_node\_subnet\_id) | Full Azure resource ID of the node subnet. |
 | <a name="output_oidc_issuer_url"></a> [oidc\_issuer\_url](#output\_oidc\_issuer\_url) | OIDC issuer URL of the AKS cluster. |
