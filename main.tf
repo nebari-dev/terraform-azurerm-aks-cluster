@@ -195,7 +195,7 @@ module "longhorn_backup" {
 
   count = var.longhorn_backup_container_create ? 1 : 0
 
-  storage_account_name = var.longhorn_backup_storage_account_name
+  storage_account_name = var.longhorn_backup_storage_account
   container_name       = var.longhorn_backup_container_name
   resource_group_name  = local.resource_group_name
   location             = local.resource_group_location
