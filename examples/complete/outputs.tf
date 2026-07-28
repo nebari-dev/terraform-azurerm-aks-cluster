@@ -14,3 +14,11 @@ output "kube_config_raw" {
   value     = module.aks_cluster.kube_config_raw
   sensitive = true
 }
+
+output "longhorn_backup_storage_account" {
+  value = module.aks_cluster.longhorn_backup_storage_account
+}
+
+output "longhorn_backup_container" {
+  value = module.aks_cluster.longhorn_backup_container
+}

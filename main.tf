@@ -181,3 +181,24 @@ resource "azapi_update_resource" "node_auto_provisioning" {
     }
   }
 }
+
+# ───────────────────────────────────────────────────────────────────────────
+# Longhorn backup storage (optional)
+#
+# Storage account + blob container for Longhorn off-cluster backups (Longhorn's
+# native azblob:// target). Disabled by default; enabled by consumers (e.g.
+# Nebari Infrastructure Core) that schedule Longhorn backups.
+# ───────────────────────────────────────────────────────────────────────────
+
+module "longhorn_backup" {
+  source = "./modules/longhorn-backup"
+
+  count = var.longhorn_backup_container_create ? 1 : 0
+
+  storage_account_name = var.longhorn_backup_storage_account
+  container_name       = var.longhorn_backup_container_name
+  resource_group_name  = local.resource_group_name
+  location             = local.resource_group_location
+
+  tags = local.tags
+}

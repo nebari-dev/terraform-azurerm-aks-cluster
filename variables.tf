@@ -201,3 +201,30 @@ variable "node_groups" {
     error_message = "At most one node group may have mode=\"System\"."
   }
 }
+
+# ───────────────────────────────────────────────────────────────────────────
+# Longhorn backup storage
+# ───────────────────────────────────────────────────────────────────────────
+
+variable "longhorn_backup_container_create" {
+  type        = bool
+  description = "Create a storage account and blob container for Longhorn off-cluster backups (Longhorn's native azblob:// target)."
+  default     = false
+}
+
+variable "longhorn_backup_storage_account" {
+  type        = string
+  description = "Name of the Longhorn backup storage account. Required when longhorn_backup_container_create is true. Must be globally unique and 3-24 lowercase alphanumeric characters."
+  default     = ""
+
+  validation {
+    condition     = !var.longhorn_backup_container_create || can(regex("^[a-z0-9]{3,24}$", var.longhorn_backup_storage_account))
+    error_message = "longhorn_backup_storage_account must be set to 3-24 lowercase alphanumeric characters when longhorn_backup_container_create is true."
+  }
+}
+
+variable "longhorn_backup_container_name" {
+  type        = string
+  description = "Name of the Longhorn backup blob container."
+  default     = "longhorn-backups"
+}
