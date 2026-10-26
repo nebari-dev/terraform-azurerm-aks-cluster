@@ -82,6 +82,8 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   private_cluster_enabled = var.private_cluster_enabled
 
+  oidc_issuer_enabled = true
+
   api_server_access_profile {
     authorized_ip_ranges = var.private_cluster_enabled || length(var.authorized_ip_ranges) == 0 ? null : var.authorized_ip_ranges
   }
