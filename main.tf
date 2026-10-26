@@ -119,6 +119,14 @@ resource "azurerm_kubernetes_cluster" "this" {
     dns_service_ip      = var.dns_service_ip
   }
 
+  # Required since azurerm 5.0. Manual keeps node pools exactly as declared
+  # here and in azurerm_kubernetes_cluster_node_pool.user, scaled by the
+  # cluster autoscaler. Auto would hand node creation to AKS Node Auto
+  # Provisioning instead.
+  node_provisioning_profile {
+    mode = "Manual"
+  }
+
   tags = local.tags
 
   depends_on = [azurerm_role_assignment.cluster_kubelet_operator]
