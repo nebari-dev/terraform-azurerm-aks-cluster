@@ -30,14 +30,12 @@ See `examples/complete` for a working example.
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9 |
-| <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) | >= 2.0 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 5.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | >= 2.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 5.0 |
 
 ## Modules
@@ -50,7 +48,6 @@ See `examples/complete` for a working example.
 
 | Name | Type |
 |------|------|
-| [azapi_update_resource.node_auto_provisioning](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/update_resource) | resource |
 | [azurerm_kubernetes_cluster.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster) | resource |
 | [azurerm_kubernetes_cluster_node_pool.user](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool) | resource |
 | [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) | resource |
@@ -83,7 +80,7 @@ See `examples/complete` for a working example.
 | <a name="input_network_plugin"></a> [network\_plugin](#input\_network\_plugin) | AKS network plugin. "azure" (recommended) or "kubenet". | `string` | `"azure"` | no |
 | <a name="input_network_plugin_mode"></a> [network\_plugin\_mode](#input\_network\_plugin\_mode) | AKS network plugin mode. "overlay" (recommended for new clusters) or null for legacy Azure CNI. | `string` | `"overlay"` | no |
 | <a name="input_node_groups"></a> [node\_groups](#input\_node\_groups) | Map of node-pool name to config. Exactly one pool must have mode="System"; if none specified, the first entry is defaulted to System. | <pre>map(object({<br/>    vm_size         = string<br/>    min_count       = number<br/>    max_count       = number<br/>    mode            = optional(string, "User")<br/>    os_disk_size_gb = optional(number, 128)<br/>    labels          = optional(map(string), {})<br/>    taints          = optional(list(string), [])<br/>    zones           = optional(list(string), [])<br/>  }))</pre> | n/a | yes |
-| <a name="input_node_provisioning_mode"></a> [node\_provisioning\_mode](#input\_node\_provisioning\_mode) | AKS node provisioning mode. "Manual" (default) or "Auto" to enable Node Auto Provisioning (Karpenter). "Auto" requires network\_data\_plane="cilium". Applied via the azapi provider because the stable azurerm provider does not yet expose this argument (see hashicorp/terraform-provider-azurerm#31418). | `string` | `"Manual"` | no |
+| <a name="input_node_provisioning_mode"></a> [node\_provisioning\_mode](#input\_node\_provisioning\_mode) | AKS node provisioning mode. "Manual" (default) or "Auto" to enable Node Auto Provisioning (Karpenter). "Auto" requires network\_data\_plane="cilium". | `string` | `"Manual"` | no |
 | <a name="input_node_subnet_cidr_block"></a> [node\_subnet\_cidr\_block](#input\_node\_subnet\_cidr\_block) | Node subnet CIDR when create\_vnet=true. | `string` | `"10.0.0.0/22"` | no |
 | <a name="input_pod_cidr"></a> [pod\_cidr](#input\_pod\_cidr) | Pod CIDR when network\_plugin\_mode="overlay". | `string` | `"10.244.0.0/16"` | no |
 | <a name="input_private_cluster_enabled"></a> [private\_cluster\_enabled](#input\_private\_cluster\_enabled) | If true, the API server is reachable only via a private endpoint. | `bool` | `false` | no |
