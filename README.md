@@ -8,6 +8,25 @@ Mirrors the conventions of [terraform-aws-eks-cluster](https://github.com/nebari
 
 See [`examples/complete`](./examples/complete) for a reference deployment.
 
+## Provider configuration
+
+Since azurerm 5.0 the provider no longer registers Azure resource providers on its own. The module's resources need the following registered in the target subscription, either beforehand or through the provider block:
+
+```hcl
+provider "azurerm" {
+  resource_providers_to_register = [
+    "Microsoft.Compute",
+    "Microsoft.ContainerService",
+    "Microsoft.ManagedIdentity",
+    "Microsoft.Network",
+    "Microsoft.Storage",
+  ]
+  features {}
+}
+```
+
+Registering requires the `*/register/action` permission on the subscription, which `Contributor` includes.
+
 ## CI/Testing
 
 Terratest runs against a real Azure subscription. The repo needs these GitHub secrets configured:
