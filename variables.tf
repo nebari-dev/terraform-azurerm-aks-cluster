@@ -160,7 +160,7 @@ variable "identity_type" {
 
 variable "node_provisioning_mode" {
   type        = string
-  description = "AKS node provisioning mode. \"Manual\" (default) or \"Auto\" to enable Node Auto Provisioning (Karpenter). \"Auto\" requires network_data_plane=\"cilium\". Applied via the azapi provider because the stable azurerm provider does not yet expose this argument (see hashicorp/terraform-provider-azurerm#31418)."
+  description = "AKS node provisioning mode. \"Manual\" (default) or \"Auto\" to enable Node Auto Provisioning (Karpenter). \"Auto\" requires network_data_plane=\"cilium\"."
   default     = "Manual"
   validation {
     condition     = contains(["Manual", "Auto"], var.node_provisioning_mode)
