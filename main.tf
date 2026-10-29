@@ -82,6 +82,8 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   private_cluster_enabled = var.private_cluster_enabled
 
+  oidc_issuer_enabled = true
+
   api_server_access_profile {
     authorized_ip_ranges = var.private_cluster_enabled || length(var.authorized_ip_ranges) == 0 ? null : var.authorized_ip_ranges
   }
@@ -117,6 +119,12 @@ resource "azurerm_kubernetes_cluster" "this" {
     pod_cidr            = var.network_plugin_mode == "overlay" ? var.pod_cidr : null
     service_cidr        = var.service_cidr
     dns_service_ip      = var.dns_service_ip
+  }
+
+  # "Auto" enables Node Auto Provisioning (Karpenter). It requires the Cilium
+  # dataplane, which the node_provisioning_mode variable validation enforces.
+  node_provisioning_profile {
+    mode = var.node_provisioning_mode
   }
 
   tags = local.tags
@@ -156,30 +164,6 @@ resource "azurerm_role_assignment" "network_contributor" {
   scope                = var.existing_node_subnet_id
   role_definition_name = "Network Contributor"
   principal_id         = azurerm_kubernetes_cluster.this.identity[0].principal_id
-}
-
-# ───────────────────────────────────────────────────────────────────────────
-# Node Auto Provisioning (NAP / Karpenter)
-#
-# The stable azurerm provider does not yet expose nodeProvisioningProfile
-# (hashicorp/terraform-provider-azurerm#31418), so we PATCH it onto the cluster
-# via azapi once azurerm has created it. NAP requires the Cilium dataplane,
-# which the node_provisioning_mode variable validation enforces.
-# ───────────────────────────────────────────────────────────────────────────
-
-resource "azapi_update_resource" "node_auto_provisioning" {
-  count = var.node_provisioning_mode == "Auto" ? 1 : 0
-
-  type        = "Microsoft.ContainerService/managedClusters@2025-05-01"
-  resource_id = azurerm_kubernetes_cluster.this.id
-
-  body = {
-    properties = {
-      nodeProvisioningProfile = {
-        mode = "Auto"
-      }
-    }
-  }
 }
 
 # ───────────────────────────────────────────────────────────────────────────

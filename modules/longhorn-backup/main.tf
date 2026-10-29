@@ -11,7 +11,10 @@ resource "azurerm_storage_account" "this" {
   location                 = var.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
-  tags                     = var.tags
+
+  allow_nested_items_to_be_public = false
+
+  tags = var.tags
 }
 
 resource "azurerm_storage_container" "this" {
