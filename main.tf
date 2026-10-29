@@ -121,10 +121,10 @@ resource "azurerm_kubernetes_cluster" "this" {
     dns_service_ip      = var.dns_service_ip
   }
 
-  # "Auto" enables Node Auto Provisioning (Karpenter). It requires the Cilium
-  # dataplane, which the node_provisioning_mode variable validation enforces.
+  # Node Auto Provisioning ("Auto") is not supported: it requires fixed-size
+  # node pools, and every pool here has the cluster autoscaler enabled.
   node_provisioning_profile {
-    mode = var.node_provisioning_mode
+    mode = "Manual"
   }
 
   tags = local.tags

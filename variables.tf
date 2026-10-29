@@ -158,20 +158,6 @@ variable "identity_type" {
   }
 }
 
-variable "node_provisioning_mode" {
-  type        = string
-  description = "AKS node provisioning mode. \"Manual\" (default) or \"Auto\" to enable Node Auto Provisioning (Karpenter). \"Auto\" requires network_data_plane=\"cilium\"."
-  default     = "Manual"
-  validation {
-    condition     = contains(["Manual", "Auto"], var.node_provisioning_mode)
-    error_message = "node_provisioning_mode must be one of: Manual, Auto."
-  }
-  validation {
-    condition     = var.node_provisioning_mode != "Auto" || var.network_data_plane == "cilium"
-    error_message = "node_provisioning_mode=\"Auto\" requires network_data_plane=\"cilium\"."
-  }
-}
-
 # ───────────────────────────────────────────────────────────────────────────
 # Node groups
 # ───────────────────────────────────────────────────────────────────────────
