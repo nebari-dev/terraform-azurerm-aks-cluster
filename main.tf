@@ -37,6 +37,13 @@ resource "azurerm_subnet" "nodes" {
   resource_group_name  = local.resource_group_name
   virtual_network_name = azurerm_virtual_network.this[0].name
   address_prefixes     = [var.node_subnet_cidr_block]
+
+  dynamic "service_endpoint" {
+    for_each = toset(var.node_subnet_service_endpoints)
+    content {
+      service = service_endpoint.value
+    }
+  }
 }
 
 # ───────────────────────────────────────────────────────────────────────────
