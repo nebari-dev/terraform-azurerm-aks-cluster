@@ -47,26 +47,26 @@ See `examples/complete` for a working example.
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 5.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 5.0 |
 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_longhorn_backup"></a> [longhorn\_backup](#module\_longhorn\_backup) | ./modules/longhorn-backup | n/a |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [azurerm_kubernetes_cluster.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster) | resource |
 | [azurerm_kubernetes_cluster_node_pool.user](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool) | resource |
 | [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) | resource |
@@ -81,7 +81,7 @@ See `examples/complete` for a working example.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_authorized_ip_ranges"></a> [authorized\_ip\_ranges](#input\_authorized\_ip\_ranges) | List of CIDRs allowed to reach the API server. Ignored when private\_cluster\_enabled=true. | `list(string)` | `[]` | no |
 | <a name="input_create_resource_group"></a> [create\_resource\_group](#input\_create\_resource\_group) | If true, the module creates the resource group. If false, existing\_resource\_group\_name must be set. | `bool` | `true` | no |
 | <a name="input_create_vnet"></a> [create\_vnet](#input\_create\_vnet) | If true, the module creates a VNet and node subnet. If false, existing\_vnet\_id and existing\_node\_subnet\_id must be set. | `bool` | `true` | no |
@@ -100,6 +100,7 @@ See `examples/complete` for a working example.
 | <a name="input_network_plugin_mode"></a> [network\_plugin\_mode](#input\_network\_plugin\_mode) | AKS network plugin mode. "overlay" (recommended for new clusters) or null for legacy Azure CNI. | `string` | `"overlay"` | no |
 | <a name="input_node_groups"></a> [node\_groups](#input\_node\_groups) | Map of node-pool name to config. Exactly one pool must have mode="System"; if none specified, the first entry is defaulted to System. | <pre>map(object({<br/>    vm_size         = string<br/>    min_count       = number<br/>    max_count       = number<br/>    mode            = optional(string, "User")<br/>    os_disk_size_gb = optional(number, 128)<br/>    labels          = optional(map(string), {})<br/>    taints          = optional(list(string), [])<br/>    zones           = optional(list(string), [])<br/>  }))</pre> | n/a | yes |
 | <a name="input_node_subnet_cidr_block"></a> [node\_subnet\_cidr\_block](#input\_node\_subnet\_cidr\_block) | Node subnet CIDR when create\_vnet=true. | `string` | `"10.0.0.0/22"` | no |
+| <a name="input_node_subnet_service_endpoints"></a> [node\_subnet\_service\_endpoints](#input\_node\_subnet\_service\_endpoints) | Service endpoints to enable on the node subnet when create\_vnet=true, e.g. ["Microsoft.Storage"] for NFS Azure file shares. Ignored when create\_vnet=false. Configure the existing subnet directly instead. | `list(string)` | `[]` | no |
 | <a name="input_pod_cidr"></a> [pod\_cidr](#input\_pod\_cidr) | Pod CIDR when network\_plugin\_mode="overlay". | `string` | `"10.244.0.0/16"` | no |
 | <a name="input_private_cluster_enabled"></a> [private\_cluster\_enabled](#input\_private\_cluster\_enabled) | If true, the API server is reachable only via a private endpoint. | `bool` | `false` | no |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | Name prefix applied to all resources (e.g. "my-nebari-azure"). | `string` | n/a | yes |
@@ -111,7 +112,7 @@ See `examples/complete` for a working example.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_cluster_ca_certificate"></a> [cluster\_ca\_certificate](#output\_cluster\_ca\_certificate) | Base64-encoded CA certificate of the AKS API server. |
 | <a name="output_cluster_fqdn"></a> [cluster\_fqdn](#output\_cluster\_fqdn) | Fully-qualified domain name of the AKS API server. |
 | <a name="output_cluster_id"></a> [cluster\_id](#output\_cluster\_id) | Full Azure resource ID of the AKS cluster. |
