@@ -64,6 +64,7 @@ func TestAKSClusterComplete(t *testing.T) {
 	defer os.Remove(kubeconfigPath)
 
 	testManagedDiskCSI(t, kubeconfigPath)
+	testFileNFS(t, kubeconfigPath)
 }
 
 func writeKubeconfig(t *testing.T, opts *terraform.Options) string {
@@ -95,6 +96,24 @@ func testManagedDiskCSI(t *testing.T, kubeconfigPath string) {
 	defer k8s.KubectlDelete(t, kubectl, "fixtures/disk-csi/pod.yaml")
 
 	k8s.WaitUntilPodAvailable(t, kubectl, "test-pod", 30, 10*time.Second)
+}
+
+// testFileNFS checks that an NFS Azure file share can be provisioned and
+// mounted, which needs the node subnet's Microsoft.Storage service endpoint
+// and the cluster identity's access to the subnet.
+func testFileNFS(t *testing.T, kubeconfigPath string) {
+	kubectl := k8s.NewKubectlOptions("", kubeconfigPath, "default")
+
+	k8s.KubectlApply(t, kubectl, "fixtures/file-nfs/storageclass.yaml")
+	defer k8s.KubectlDelete(t, kubectl, "fixtures/file-nfs/storageclass.yaml")
+
+	k8s.KubectlApply(t, kubectl, "fixtures/file-nfs/pvc.yaml")
+	defer k8s.KubectlDelete(t, kubectl, "fixtures/file-nfs/pvc.yaml")
+
+	k8s.KubectlApply(t, kubectl, "fixtures/file-nfs/pod.yaml")
+	defer k8s.KubectlDelete(t, kubectl, "fixtures/file-nfs/pod.yaml")
+
+	k8s.WaitUntilPodAvailable(t, kubectl, "test-nfs-pod", 30, 10*time.Second)
 }
 
 func getEnvOrDefault(key, defaultValue string) string {
