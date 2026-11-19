@@ -1,0 +1,14 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: test-azurefile-nfs
+provisioner: file.csi.azure.com
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+parameters:
+  protocol: nfs
+  skuName: Premium_LRS
+mountOptions:
+  - nconnect=4
+  - noresvport
+  - actimeo=30

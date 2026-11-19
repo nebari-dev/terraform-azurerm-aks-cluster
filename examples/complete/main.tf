@@ -14,6 +14,9 @@ module "aks_cluster" {
   service_cidr           = "10.10.16.0/22"
   dns_service_ip         = "10.10.16.10"
 
+  # Required for NFS Azure file shares, which only accept traffic from the VNet.
+  node_subnet_service_endpoints = ["Microsoft.Storage"]
+
   node_groups = {
     system = {
       vm_size   = "Standard_D2_v3"

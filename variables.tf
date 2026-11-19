@@ -56,6 +56,12 @@ variable "node_subnet_cidr_block" {
   default     = "10.0.0.0/22"
 }
 
+variable "node_subnet_service_endpoints" {
+  type        = list(string)
+  description = "Service endpoints to enable on the node subnet when create_vnet=true, e.g. [\"Microsoft.Storage\"] for NFS Azure file shares. Ignored when create_vnet=false. Configure the existing subnet directly instead."
+  default     = []
+}
+
 variable "existing_vnet_id" {
   type        = string
   description = "Full resource ID of an existing VNet when create_vnet=false."

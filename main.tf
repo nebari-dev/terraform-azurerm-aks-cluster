@@ -37,6 +37,13 @@ resource "azurerm_subnet" "nodes" {
   resource_group_name  = local.resource_group_name
   virtual_network_name = azurerm_virtual_network.this[0].name
   address_prefixes     = [var.node_subnet_cidr_block]
+
+  dynamic "service_endpoint" {
+    for_each = toset(var.node_subnet_service_endpoints)
+    content {
+      service = service_endpoint.value
+    }
+  }
 }
 
 # ───────────────────────────────────────────────────────────────────────────
@@ -129,7 +136,10 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   tags = local.tags
 
-  depends_on = [azurerm_role_assignment.cluster_kubelet_operator]
+  depends_on = [
+    azurerm_role_assignment.cluster_kubelet_operator,
+    azurerm_role_assignment.network_contributor,
+  ]
 }
 
 # ───────────────────────────────────────────────────────────────────────────
@@ -155,15 +165,25 @@ resource "azurerm_kubernetes_cluster_node_pool" "user" {
 }
 
 # ───────────────────────────────────────────────────────────────────────────
-# Role assignment: AKS identity → existing subnet (only when BYO networking)
+# Role assignment: AKS identity → node subnet
+#
+# AKS requires the cluster identity to hold Network Contributor on a custom
+# node subnet, and non-CLI clients must assign it themselves. The module passes
+# a custom subnet in both networking modes, so the role is granted in both.
+# Internal LoadBalancers allocate frontend IPs from this subnet, and the Azure
+# Files CSI driver reads it when provisioning NFS shares. The role is assigned
+# to the pre-created identity so it exists before the cluster does.
 # ───────────────────────────────────────────────────────────────────────────
 
 resource "azurerm_role_assignment" "network_contributor" {
-  count = var.create_vnet ? 0 : 1
-
-  scope                = var.existing_node_subnet_id
+  scope                = local.node_subnet_id
   role_definition_name = "Network Contributor"
-  principal_id         = azurerm_kubernetes_cluster.this.identity[0].principal_id
+  principal_id         = azurerm_user_assigned_identity.cluster.principal_id
+}
+
+moved {
+  from = azurerm_role_assignment.network_contributor[0]
+  to   = azurerm_role_assignment.network_contributor
 }
 
 # ───────────────────────────────────────────────────────────────────────────
